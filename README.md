@@ -19,10 +19,11 @@ Three views over one dataset:
    individual award transactions (free-text search, agency/category/country
    filters, amount range, pagination), sorted by spend descending by
    default so the biggest awards surface first.
-3. **Vendor Lookup**: pick a country to see a top-10-by-spend breakdown of
-   its vendors, then pick one for its full FY2025 profile: total spend,
-   distinct award count, agencies sold to, top categories, and its own
-   monthly trend.
+3. **Vendor Lookup**: opens on a top-10-by-spend breakdown of all 181
+   countries; pick one to drill into its vendors (same top-10 breakdown,
+   one level down), then pick a vendor for its full FY2025 profile: total
+   spend, distinct award count, agencies sold to, top categories, and its
+   own monthly trend.
 
 ## About the dataset
 

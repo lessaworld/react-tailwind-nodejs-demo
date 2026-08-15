@@ -98,8 +98,14 @@ breakdown chart in [Dashboard.jsx](client/src/views/Dashboard.jsx), with
 data passed in as a plain array prop. Recharts handles the SVG rendering;
 the app just feeds it the already-aggregated data from the API.
 
-Vendor Lookup's country-level view uses the same package's `<PieChart>` /
-`<Pie>` / `<Cell>` components for a top-10-vendors-plus-"Others" breakdown,
-shown while a country is selected but no vendor is yet. Since it's the same
-`recharts` dependency already installed for the bar charts, this didn't add
-a new package.
+Vendor Lookup uses the same package's `<PieChart>` / `<Pie>` / `<Cell>`
+components for a top-10-plus-"Others" breakdown, by country before any
+dropdown is touched, then by vendor once a country is picked. Since it's
+the same `recharts` dependency already installed for the bar charts, this
+didn't add a new package. Both cases share one `BreakdownOverview`
+component in [VendorLookup.jsx](client/src/views/VendorLookup.jsx), fed
+either the `countries` or `vendors` list; a `colorForSlice()` helper picks
+each slice's color by rank and gets handed to `RankedList` too (as a
+`colorFor` prop it renders as a small swatch), so the chart and its legend
+list always agree on which color means which entity without either one
+hardcoding the other's colors.

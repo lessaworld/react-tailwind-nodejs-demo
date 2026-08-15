@@ -103,13 +103,19 @@ gridlines (`fill="var(--accent-1)"` instead of a hardcoded hex), so they
 follow dark mode too without any chart-specific theming logic. The bar
 charts stick to a single hue on purpose: it's one measure (dollars) per
 bar, so color isn't carrying any identity, and the axis labels already say
-what each bar is. Vendor Lookup's country-level pie chart (top 10 vendors
-plus an "Others" slice) extends the same idea instead of switching to a
-rainbow: every slice is that one accent hue at a different opacity, darkest
-for the top vendor and fading out by rank, with "Others" broken out in a
-neutral gray since it's an aggregate, not a real vendor. The exact figures
-still live in the ranked list next to the chart, so no slice depends on
-color alone to be identified.
+what each bar is.
+
+Vendor Lookup's pie charts (top 10 by spend, plus an "Others" slice for the
+rest) are the one spot where color *is* carrying identity, since each slice
+is a different country or vendor. `index.css` defines a fixed 10-color
+palette (`--series-1` through `--series-10`, each with its own light/dark
+value) assigned by rank, and "Others" always gets a distinct neutral gray
+since it's an aggregate, not a real entity. The ranked list next to each
+chart reuses that exact same color function for a small swatch beside each
+row, so the chart and the list stay visually linked without duplicating any
+color logic between them. This view shows twice: countries by default
+(before any dropdown is touched), and vendors within a country once one is
+picked.
 
 ## Packages, the short list
 

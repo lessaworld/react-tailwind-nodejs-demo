@@ -5,6 +5,29 @@ import { formatCurrencyCompact, formatCurrencyFull } from '../lib/format.js'
 import StatTile from '../components/StatTile.jsx'
 import MonthlyBarChart from '../components/MonthlyBarChart.jsx'
 
+const OTHERS_COLOR = 'var(--muted-1)'
+const SERIES_COUNT = 10
+
+function seriesColor(index) {
+  return `var(--series-${(index % SERIES_COUNT) + 1})`
+}
+
+// Same color for a slice and its legend entry: rank-based for real entities,
+// a distinct neutral for "Others" since it's an aggregate, not one of them.
+function colorForSlice(entry, index) {
+  return entry.name === 'Others' ? OTHERS_COLOR : seriesColor(index)
+}
+
+// Top 10 by spend, with anything past that collapsed into one "Others" slice.
+function buildTopSlices(items, nameKey) {
+  const top = items.slice(0, SERIES_COUNT)
+  const othersTotal = items.slice(SERIES_COUNT).reduce((sum, item) => sum + item.totalAmount, 0)
+  return [
+    ...top.map((item) => ({ name: item[nameKey], totalAmount: item.totalAmount })),
+    ...(othersTotal > 0 ? [{ name: 'Others', totalAmount: othersTotal }] : []),
+  ]
+}
+
 export default function VendorLookup() {
   const [countries, setCountries] = useState([])
   const [country, setCountry] = useState('')
@@ -80,65 +103,54 @@ export default function VendorLookup() {
       {profile && <VendorProfile profile={profile} />}
 
       {!profile && country && vendors.length > 0 && (
-        <CountryOverview country={country} vendors={vendors} />
+        <BreakdownOverview
+          title={country}
+          subtitle={`Top ${Math.min(SERIES_COUNT, vendors.length)} of ${vendors.length.toLocaleString()} vendors by FY2025 spend. Pick one above for its full profile.`}
+          listTitle="Top vendors"
+          slices={buildTopSlices(vendors, 'recipient')}
+        />
       )}
 
-      {!profile && !country && (
-        <div className="rounded-lg border border-dashed border-hairline p-10 text-center text-sm text-muted">
-          Pick a country to see its top vendors, then a vendor for its full FY2025 profile.
-        </div>
+      {/* Before any country is picked, lead with the same breakdown one level
+          up (by country instead of vendor), so there's something to look at
+          immediately instead of an empty state. */}
+      {!profile && !country && countries.length > 0 && (
+        <BreakdownOverview
+          title="All countries"
+          subtitle={`Top ${Math.min(SERIES_COUNT, countries.length)} of ${countries.length.toLocaleString()} countries by FY2025 spend. Pick one above to drill into its vendors.`}
+          listTitle="Top countries"
+          slices={buildTopSlices(countries, 'country')}
+        />
       )}
     </div>
   )
 }
 
-// Shown once a country is picked but before a vendor is: a top-10-by-spend
-// breakdown (an 11th "Others" slice covers the rest) so there's something
-// to look at immediately instead of an empty state.
-function CountryOverview({ country, vendors }) {
-  const top10 = vendors.slice(0, 10)
-  const othersTotal = vendors.slice(10).reduce((sum, v) => sum + v.totalAmount, 0)
-  const slices = [
-    ...top10.map((v) => ({ name: v.recipient, totalAmount: v.totalAmount })),
-    ...(othersTotal > 0 ? [{ name: 'Others', totalAmount: othersTotal }] : []),
-  ]
-
+function BreakdownOverview({ title, subtitle, listTitle, slices }) {
   return (
     <div>
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-ink">{country}</h2>
-        <p className="text-sm text-muted">
-          Top {top10.length} of {vendors.length.toLocaleString()} vendors by FY2025 spend. Pick one above for its
-          full profile.
-        </p>
+        <h2 className="text-lg font-semibold text-ink">{title}</h2>
+        <p className="text-sm text-muted">{subtitle}</p>
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-hairline bg-surface p-4">
-          <h3 className="mb-3 text-sm font-medium text-ink">Share of country spend</h3>
-          <TopVendorsPieChart slices={slices} />
+          <h3 className="mb-3 text-sm font-medium text-ink">Share of total spend</h3>
+          <BreakdownPieChart slices={slices} />
         </div>
-        <RankedList title="Top vendors" items={slices} nameKey="name" limit={slices.length} />
+        <RankedList title={listTitle} items={slices} nameKey="name" limit={slices.length} colorFor={colorForSlice} />
       </div>
     </div>
   )
 }
 
-// One hue, graded by rank (rank 1 solid, rank 10 faintest) so the ranking
-// itself carries information, not just the wedge size. "Others" gets a
-// distinct neutral fill since it's an aggregate bucket, not a real vendor.
-function TopVendorsPieChart({ slices }) {
+function BreakdownPieChart({ slices }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <PieChart>
         <Pie data={slices} dataKey="totalAmount" nameKey="name" outerRadius={100} paddingAngle={1.5}>
           {slices.map((entry, i) => (
-            <Cell
-              key={entry.name}
-              fill={entry.name === 'Others' ? 'var(--muted-1)' : 'var(--accent-1)'}
-              fillOpacity={entry.name === 'Others' ? 1 : Math.max(0.35, 1 - i * 0.075)}
-              stroke="var(--surface-1)"
-              strokeWidth={2}
-            />
+            <Cell key={entry.name} fill={colorForSlice(entry, i)} stroke="var(--surface-1)" strokeWidth={2} />
           ))}
         </Pie>
         <Tooltip
@@ -183,14 +195,22 @@ function VendorProfile({ profile }) {
   )
 }
 
-function RankedList({ title, items, nameKey, limit = 8 }) {
+function RankedList({ title, items, nameKey, limit = 8, colorFor }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface p-4">
       <h3 className="mb-3 text-sm font-medium text-ink">{title}</h3>
       <ul className="space-y-2 text-sm">
-        {items.slice(0, limit).map((item) => (
+        {items.slice(0, limit).map((item, i) => (
           <li key={item[nameKey]} className="flex items-center justify-between gap-3">
-            <span className="text-ink-secondary">{item[nameKey]}</span>
+            <span className="flex min-w-0 items-center gap-2 text-ink-secondary">
+              {colorFor && (
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                  style={{ backgroundColor: colorFor(item, i) }}
+                />
+              )}
+              <span className="truncate">{item[nameKey]}</span>
+            </span>
             <span className="whitespace-nowrap tabular-nums text-ink">{formatCurrencyFull(item.totalAmount)}</span>
           </li>
         ))}
