@@ -1,7 +1,6 @@
 import { useState } from 'react'
 
-const ARCHITECTURE_URL =
-  'https://github.com/lessaworld/react-tailwind-nodejs-demo/blob/master/ARCHITECTURE.md'
+const REPO_URL = 'https://github.com/lessaworld/react-tailwind-nodejs-demo'
 
 // A welcome gate for the public demo link, shown on every page load. The
 // backdrop is a solid, opaque page-color fill (not a dark/blurred overlay)
@@ -27,7 +26,7 @@ export default function LandingModal() {
         </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <a
-            href={ARCHITECTURE_URL}
+            href={REPO_URL}
             target="_blank"
             rel="noreferrer"
             onClick={dismiss}
