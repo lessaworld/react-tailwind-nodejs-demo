@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const ARCHITECTURE_URL =
-  'https://github.com/lessaworld/react-tailwind-nodejs-demo/blob/main/ARCHITECTURE.md'
+  'https://github.com/lessaworld/react-tailwind-nodejs-demo/blob/master/ARCHITECTURE.md'
 
 // A welcome overlay for the public demo link, shown on every page load, with
 // two equally-weighted paths: read the code, or dismiss it and use the app.
