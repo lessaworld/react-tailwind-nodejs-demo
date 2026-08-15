@@ -3,8 +3,11 @@ import { useState } from 'react'
 const ARCHITECTURE_URL =
   'https://github.com/lessaworld/react-tailwind-nodejs-demo/blob/master/ARCHITECTURE.md'
 
-// A welcome overlay for the public demo link, shown on every page load, with
-// two equally-weighted paths: read the code, or dismiss it and use the app.
+// A welcome gate for the public demo link, shown on every page load. The
+// backdrop is a solid, opaque page-color fill (not a dark/blurred overlay)
+// so nothing of the app underneath is visible, and there's no click-outside
+// or Escape handler -- the visitor must pick one of the two buttons to
+// reveal the app.
 export default function LandingModal() {
   const [open, setOpen] = useState(true)
 
@@ -15,14 +18,8 @@ export default function LandingModal() {
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xl"
-      onClick={dismiss}
-    >
-      <div
-        className="max-w-md rounded-lg border border-hairline bg-surface p-6 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page p-4">
+      <div className="max-w-md rounded-lg border border-hairline bg-surface p-6 shadow-lg">
         <h2 className="text-lg font-semibold text-ink">FY2025 Foreign Contractor Spend Explorer</h2>
         <p className="mt-2 text-sm text-ink-secondary">
           A demo app for exploring U.S. federal contract awards to foreign vendors in FY2025,
@@ -33,6 +30,7 @@ export default function LandingModal() {
             href={ARCHITECTURE_URL}
             target="_blank"
             rel="noreferrer"
+            onClick={dismiss}
             className="rounded-md border border-hairline px-3 py-2.5 text-center text-sm font-medium text-ink hover:bg-page"
           >
             See the code
