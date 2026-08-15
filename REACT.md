@@ -29,7 +29,7 @@ const [tab, setTab] = useState('dashboard')
 
 (Dashboard is the default landing tab, on purpose: a chart makes a better
 first impression than an empty-looking table.) It then conditionally
-renders `<Explorer />`, `<Dashboard />`, or `<VendorLookup />` based on
+renders `<AwardExplorer />`, `<Dashboard />`, or `<CountryExplorer />` based on
 that value. With only three views, pulling in
 `react-router` would be solving a problem the app doesn't have. Likewise
 there's no Redux or Context API: every view fetches and owns its own data,
@@ -47,16 +47,20 @@ used anywhere are `useState` and `useEffect`:
 
 Two effects are worth calling out specifically:
 
-- **Debounced search**, in [Explorer.jsx](client/src/views/Explorer.jsx):
+- **Debounced search**, in [AwardExplorer.jsx](client/src/views/AwardExplorer.jsx):
   typing updates a local `qInput` state on every keystroke, but a second
   effect only copies that into the state that actually triggers a fetch
   after 300ms of no typing, so searching ~124k rows doesn't fire a request
   per character.
 - **Cascading selects**, in
-  [VendorLookup.jsx](client/src/views/VendorLookup.jsx): picking a country
+  [CountryExplorer.jsx](client/src/views/CountryExplorer.jsx): picking a country
   fetches that country's vendor list *and* resets whatever vendor/profile
   was previously selected, so switching countries can't leave a stale
-  profile on screen from the last one.
+  profile on screen from the last one. This cascade doesn't care *how*
+  `country`/`recipient` got set: the `<select>`'s `onChange` and a click on
+  a pie slice or ranked-list row both just call the same `setCountry` /
+  `setRecipient`, so both paths trigger the identical fetch-and-reset
+  behavior with no extra code.
 
 ## 4. Composition: small, reusable pieces
 
@@ -65,10 +69,10 @@ A few components are shared across views rather than duplicated:
 - [Nav.jsx](client/src/components/Nav.jsx): the top tab bar, used once in
   `App.jsx`.
 - [StatTile.jsx](client/src/components/StatTile.jsx): the small
-  label/value cards, reused across Vendor Lookup's profile panel.
+  label/value cards, reused across Country Explorer's vendor profile panel.
 - [MonthlyBarChart.jsx](client/src/components/MonthlyBarChart.jsx): the
   FY2025 monthly bar chart, used by both the Dashboard (overall spend) and
-  Vendor Lookup (one vendor's spend) with different data passed in as
+  Country Explorer (one vendor's spend) with different data passed in as
   props.
 - [LandingModal.jsx](client/src/components/LandingModal.jsx): the welcome
   overlay, mounted once at the top of `App.jsx`.
@@ -98,14 +102,16 @@ breakdown chart in [Dashboard.jsx](client/src/views/Dashboard.jsx), with
 data passed in as a plain array prop. Recharts handles the SVG rendering;
 the app just feeds it the already-aggregated data from the API.
 
-Vendor Lookup uses the same package's `<PieChart>` / `<Pie>` / `<Cell>`
+Country Explorer uses the same package's `<PieChart>` / `<Pie>` / `<Cell>`
 components for a top-10-plus-"Others" breakdown, by country before any
 dropdown is touched, then by vendor once a country is picked. Since it's
 the same `recharts` dependency already installed for the bar charts, this
 didn't add a new package. Both cases share one `BreakdownOverview`
-component in [VendorLookup.jsx](client/src/views/VendorLookup.jsx), fed
+component in [CountryExplorer.jsx](client/src/views/CountryExplorer.jsx), fed
 either the `countries` or `vendors` list; a `colorForSlice()` helper picks
 each slice's color by rank and gets handed to `RankedList` too (as a
 `colorFor` prop it renders as a small swatch), so the chart and its legend
 list always agree on which color means which entity without either one
-hardcoding the other's colors.
+hardcoding the other's colors. An `onSelect` prop rides along the same
+path, so clicking a slice or a list row calls the exact `setCountry` /
+`setRecipient` the dropdown above would have.

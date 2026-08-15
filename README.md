@@ -15,11 +15,11 @@ Three views over one dataset:
 
 1. **Monthly Spend Dashboard** (the default landing tab): FY2025 spend by
    month, plus a top-10 breakdown by agency or by country, both filterable.
-2. **Purchase Order Explorer**: a searchable, filterable, sortable table of
+2. **Award Explorer**: a searchable, filterable, sortable table of
    individual award transactions (free-text search, agency/category/country
    filters, amount range, pagination), sorted by spend descending by
    default so the biggest awards surface first.
-3. **Vendor Lookup**: opens on a top-10-by-spend breakdown of all 181
+3. **Country Explorer**: opens on a top-10-by-spend breakdown of all 181
    countries; pick one to drill into its vendors (same top-10 breakdown,
    one level down), then pick a vendor for its full FY2025 profile: total
    spend, distinct award count, agencies sold to, top categories, and its
@@ -36,7 +36,7 @@ service, ship chandlery, base support) for installations overseas, plus
 contracts with foreign defense manufacturers like Kongsberg, BAE Systems,
 and Leonardo.
 
-That scope is also why Vendor Lookup drills down **country first, then
+That scope is also why Country Explorer drills down **country first, then
 vendor**: with thousands of vendors, browsing by country and then by vendor
 within it is a far more usable way to explore than one flat list.
 

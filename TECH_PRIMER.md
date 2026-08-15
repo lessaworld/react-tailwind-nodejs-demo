@@ -224,7 +224,7 @@ directly from it:
 - **Fetching data isn't "rendering"**, it's a side effect: something that
   reaches outside the component (to the network) and doesn't have a
   result to return synchronously. `useEffect` is where that kind of code
-  belongs. In [`Explorer.jsx`](client/src/views/Explorer.jsx):
+  belongs. In [`AwardExplorer.jsx`](client/src/views/AwardExplorer.jsx):
   ```js
   useEffect(() => {
     fetchAwards({ ...filters, sort, order, page }).then(setResult)

@@ -50,7 +50,7 @@ A few representative spots:
 - [Nav.jsx](client/src/components/Nav.jsx): the tab bar uses `border-b-2`
   plus conditional `border-accent text-ink` vs `border-transparent
   text-muted` to show which tab is active.
-- [Explorer.jsx](client/src/views/Explorer.jsx): the filter row
+- [AwardExplorer.jsx](client/src/views/AwardExplorer.jsx): the filter row
   (`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`) and the table
   (`overflow-x-auto`, `whitespace-nowrap`, `tabular-nums` on the amount
   column so digits align).

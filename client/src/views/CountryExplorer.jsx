@@ -28,7 +28,7 @@ function buildTopSlices(items, nameKey) {
   ]
 }
 
-export default function VendorLookup() {
+export default function CountryExplorer() {
   const [countries, setCountries] = useState([])
   const [country, setCountry] = useState('')
   const [vendors, setVendors] = useState([])
@@ -105,9 +105,10 @@ export default function VendorLookup() {
       {!profile && country && vendors.length > 0 && (
         <BreakdownOverview
           title={country}
-          subtitle={`Top ${Math.min(SERIES_COUNT, vendors.length)} of ${vendors.length.toLocaleString()} vendors by FY2025 spend. Pick one above for its full profile.`}
+          subtitle={`Top ${Math.min(SERIES_COUNT, vendors.length)} of ${vendors.length.toLocaleString()} vendors by FY2025 spend. Pick one above (or in the chart) for its full profile.`}
           listTitle="Top vendors"
           slices={buildTopSlices(vendors, 'recipient')}
+          onSelect={setRecipient}
         />
       )}
 
@@ -117,16 +118,17 @@ export default function VendorLookup() {
       {!profile && !country && countries.length > 0 && (
         <BreakdownOverview
           title="All countries"
-          subtitle={`Top ${Math.min(SERIES_COUNT, countries.length)} of ${countries.length.toLocaleString()} countries by FY2025 spend. Pick one above to drill into its vendors.`}
+          subtitle={`Top ${Math.min(SERIES_COUNT, countries.length)} of ${countries.length.toLocaleString()} countries by FY2025 spend. Pick one above (or in the chart) to drill into its vendors.`}
           listTitle="Top countries"
           slices={buildTopSlices(countries, 'country')}
+          onSelect={setCountry}
         />
       )}
     </div>
   )
 }
 
-function BreakdownOverview({ title, subtitle, listTitle, slices }) {
+function BreakdownOverview({ title, subtitle, listTitle, slices, onSelect }) {
   return (
     <div>
       <div className="mb-4">
@@ -136,22 +138,42 @@ function BreakdownOverview({ title, subtitle, listTitle, slices }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-hairline bg-surface p-4">
           <h3 className="mb-3 text-sm font-medium text-ink">Share of total spend</h3>
-          <BreakdownPieChart slices={slices} />
+          <BreakdownPieChart slices={slices} onSelect={onSelect} />
         </div>
-        <RankedList title={listTitle} items={slices} nameKey="name" limit={slices.length} colorFor={colorForSlice} />
+        <RankedList
+          title={listTitle}
+          items={slices}
+          nameKey="name"
+          limit={slices.length}
+          colorFor={colorForSlice}
+          onSelect={onSelect}
+        />
       </div>
     </div>
   )
 }
 
-function BreakdownPieChart({ slices }) {
+// Clicking a slice (or the matching row in the ranked list) selects that
+// country/vendor, the same as picking it from the dropdown above -- "Others"
+// isn't a real entity, so it's excluded from both.
+function BreakdownPieChart({ slices, onSelect }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <PieChart>
         <Pie data={slices} dataKey="totalAmount" nameKey="name" outerRadius={100} paddingAngle={1.5}>
-          {slices.map((entry, i) => (
-            <Cell key={entry.name} fill={colorForSlice(entry, i)} stroke="var(--surface-1)" strokeWidth={2} />
-          ))}
+          {slices.map((entry, i) => {
+            const selectable = entry.name !== 'Others'
+            return (
+              <Cell
+                key={entry.name}
+                fill={colorForSlice(entry, i)}
+                stroke="var(--surface-1)"
+                strokeWidth={2}
+                cursor={selectable ? 'pointer' : 'default'}
+                onClick={selectable ? () => onSelect(entry.name) : undefined}
+              />
+            )
+          })}
         </Pie>
         <Tooltip
           contentStyle={{
@@ -195,25 +217,45 @@ function VendorProfile({ profile }) {
   )
 }
 
-function RankedList({ title, items, nameKey, limit = 8, colorFor }) {
+function RankedList({ title, items, nameKey, limit = 8, colorFor, onSelect }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface p-4">
       <h3 className="mb-3 text-sm font-medium text-ink">{title}</h3>
       <ul className="space-y-2 text-sm">
-        {items.slice(0, limit).map((item, i) => (
-          <li key={item[nameKey]} className="flex items-center justify-between gap-3">
-            <span className="flex min-w-0 items-center gap-2 text-ink-secondary">
-              {colorFor && (
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                  style={{ backgroundColor: colorFor(item, i) }}
-                />
+        {items.slice(0, limit).map((item, i) => {
+          const row = (
+            <>
+              <span className="flex min-w-0 items-center gap-2 text-ink-secondary">
+                {colorFor && (
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: colorFor(item, i) }}
+                  />
+                )}
+                <span className="truncate">{item[nameKey]}</span>
+              </span>
+              <span className="whitespace-nowrap tabular-nums text-ink">{formatCurrencyFull(item.totalAmount)}</span>
+            </>
+          )
+          // Clicking a row selects it, same as picking it from the dropdown
+          // above -- "Others" isn't a real entity, so it stays unclickable.
+          const selectable = onSelect && item[nameKey] !== 'Others'
+          return (
+            <li key={item[nameKey]}>
+              {selectable ? (
+                <button
+                  type="button"
+                  onClick={() => onSelect(item[nameKey])}
+                  className="flex w-full items-center justify-between gap-3 rounded px-1 py-0.5 text-left hover:bg-page"
+                >
+                  {row}
+                </button>
+              ) : (
+                <div className="flex items-center justify-between gap-3">{row}</div>
               )}
-              <span className="truncate">{item[nameKey]}</span>
-            </span>
-            <span className="whitespace-nowrap tabular-nums text-ink">{formatCurrencyFull(item.totalAmount)}</span>
-          </li>
-        ))}
+            </li>
+          )
+        })}
         {items.length === 0 && <li className="text-muted">None</li>}
       </ul>
     </div>

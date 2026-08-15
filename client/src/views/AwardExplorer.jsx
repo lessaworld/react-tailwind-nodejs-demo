@@ -13,7 +13,7 @@ const emptyFilters = {
   maxAmount: '',
 }
 
-export default function Explorer() {
+export default function AwardExplorer() {
   const [filterOptions, setFilterOptions] = useState({ agencies: [], categories: [], countries: [] })
   const [filters, setFilters] = useState(emptyFilters)
   const [qInput, setQInput] = useState('')

@@ -18,7 +18,7 @@ repo-root/
   client/              Vite + React + Tailwind
     src/
       components/       Nav, StatTile, MonthlyBarChart (shared)
-      views/             Explorer, Dashboard, VendorLookup
+      views/             AwardExplorer, Dashboard, CountryExplorer
       lib/               api.js (fetch helpers), format.js
   server/              Express
     data/               fy2025-awards.json (baked into the image)
@@ -67,7 +67,7 @@ need, each pulling query params off `req.query` and handing them to a
 | `GET /api/awards/monthly` | FY2025 Oct–Sep totals. Optional `recipient`, `agency`, `country` |
 | `GET /api/awards/breakdown` | Top-N totals by `agency` or `country` (`by=`), respecting the other filter |
 | `GET /api/filters` | Distinct agencies/categories/countries, for filter dropdowns |
-| `GET /api/countries` | Countries sorted by total spend (Vendor Lookup step 1) |
+| `GET /api/countries` | Countries sorted by total spend (Country Explorer step 1) |
 | `GET /api/countries/:country/vendors` | Vendors in a country, sorted by total spend (step 2) |
 | `GET /api/vendors/:recipient` | Full vendor profile: totals, agencies, categories, monthly trend |
 
@@ -82,12 +82,15 @@ Redux, no router. Three fixed views means `App.jsx` just keeps the active
 tab in state and renders one of three components; each view fetches its own
 data with a `useEffect` and a small wrapper function from `lib/api.js`.
 
-Two effects do more than "fetch on mount": the Explorer's search box is
-debounced (a local keystroke-tracking state updates a separate, fetch-
+Two effects do more than "fetch on mount": the Award Explorer's search box
+is debounced (a local keystroke-tracking state updates a separate, fetch-
 triggering state only after 300ms of no typing, so searching 124k rows
-doesn't fire a request per character), and Vendor Lookup is a real cascade
-(picking a country clears whatever vendor/profile was selected for the
-previous one before loading the new country's vendor list).
+doesn't fire a request per character), and Country Explorer is a real
+cascade (picking a country clears whatever vendor/profile was selected for
+the previous one before loading the new country's vendor list). Clicking a
+pie slice or a ranked-list row in Country Explorer feeds into that same
+cascade, since both just call the same `setCountry`/`setRecipient` the
+dropdowns above already use.
 
 ## Tailwind, and making charts match the page
 
@@ -105,7 +108,7 @@ charts stick to a single hue on purpose: it's one measure (dollars) per
 bar, so color isn't carrying any identity, and the axis labels already say
 what each bar is.
 
-Vendor Lookup's pie charts (top 10 by spend, plus an "Others" slice for the
+Country Explorer's pie charts (top 10 by spend, plus an "Others" slice for the
 rest) are the one spot where color *is* carrying identity, since each slice
 is a different country or vendor. `index.css` defines a fixed 10-color
 palette (`--series-1` through `--series-10`, each with its own light/dark
