@@ -8,8 +8,9 @@ import VendorLookup from './views/VendorLookup.jsx'
 
 export default function App() {
   // Just three fixed views, so a bit of local state stands in for a router --
-  // no react-router needed for this.
-  const [tab, setTab] = useState('explorer')
+  // no react-router needed for this. Dashboard is the default landing tab
+  // (a chart is a better first impression than an empty-looking table).
+  const [tab, setTab] = useState('dashboard')
 
   return (
     <div className="min-h-screen bg-page">

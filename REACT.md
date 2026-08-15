@@ -24,11 +24,13 @@ that one call.
 tab, in a plain `useState`:
 
 ```js
-const [tab, setTab] = useState('explorer')
+const [tab, setTab] = useState('dashboard')
 ```
 
-and conditionally renders `<Explorer />`, `<Dashboard />`, or
-`<VendorLookup />` based on it. With only three views, pulling in
+(Dashboard is the default landing tab, on purpose: a chart makes a better
+first impression than an empty-looking table.) It then conditionally
+renders `<Explorer />`, `<Dashboard />`, or `<VendorLookup />` based on
+that value. With only three views, pulling in
 `react-router` would be solving a problem the app doesn't have. Likewise
 there's no Redux or Context API: every view fetches and owns its own data,
 so there's nothing that actually needs to be shared globally.
@@ -95,3 +97,9 @@ same way as any other React library: composed as JSX inside
 breakdown chart in [Dashboard.jsx](client/src/views/Dashboard.jsx), with
 data passed in as a plain array prop. Recharts handles the SVG rendering;
 the app just feeds it the already-aggregated data from the API.
+
+Vendor Lookup's country-level view uses the same package's `<PieChart>` /
+`<Pie>` / `<Cell>` components for a top-10-vendors-plus-"Others" breakdown,
+shown while a country is selected but no vendor is yet. Since it's the same
+`recharts` dependency already installed for the bar charts, this didn't add
+a new package.

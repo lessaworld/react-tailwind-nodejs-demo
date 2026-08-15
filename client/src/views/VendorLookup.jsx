@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { fetchCountries, fetchVendorProfile, fetchVendorsForCountry } from '../lib/api.js'
 import { formatCurrencyCompact, formatCurrencyFull } from '../lib/format.js'
 import StatTile from '../components/StatTile.jsx'
@@ -78,12 +79,80 @@ export default function VendorLookup() {
 
       {profile && <VendorProfile profile={profile} />}
 
-      {!profile && (
+      {!profile && country && vendors.length > 0 && (
+        <CountryOverview country={country} vendors={vendors} />
+      )}
+
+      {!profile && !country && (
         <div className="rounded-lg border border-dashed border-hairline p-10 text-center text-sm text-muted">
-          Pick a country, then a vendor, to see its FY2025 contract profile.
+          Pick a country to see its top vendors, then a vendor for its full FY2025 profile.
         </div>
       )}
     </div>
+  )
+}
+
+// Shown once a country is picked but before a vendor is: a top-10-by-spend
+// breakdown (an 11th "Others" slice covers the rest) so there's something
+// to look at immediately instead of an empty state.
+function CountryOverview({ country, vendors }) {
+  const top10 = vendors.slice(0, 10)
+  const othersTotal = vendors.slice(10).reduce((sum, v) => sum + v.totalAmount, 0)
+  const slices = [
+    ...top10.map((v) => ({ name: v.recipient, totalAmount: v.totalAmount })),
+    ...(othersTotal > 0 ? [{ name: 'Others', totalAmount: othersTotal }] : []),
+  ]
+
+  return (
+    <div>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-ink">{country}</h2>
+        <p className="text-sm text-muted">
+          Top {top10.length} of {vendors.length.toLocaleString()} vendors by FY2025 spend. Pick one above for its
+          full profile.
+        </p>
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="rounded-lg border border-hairline bg-surface p-4">
+          <h3 className="mb-3 text-sm font-medium text-ink">Share of country spend</h3>
+          <TopVendorsPieChart slices={slices} />
+        </div>
+        <RankedList title="Top vendors" items={slices} nameKey="name" limit={slices.length} />
+      </div>
+    </div>
+  )
+}
+
+// One hue, graded by rank (rank 1 solid, rank 10 faintest) so the ranking
+// itself carries information, not just the wedge size. "Others" gets a
+// distinct neutral fill since it's an aggregate bucket, not a real vendor.
+function TopVendorsPieChart({ slices }) {
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <PieChart>
+        <Pie data={slices} dataKey="totalAmount" nameKey="name" outerRadius={100} paddingAngle={1.5}>
+          {slices.map((entry, i) => (
+            <Cell
+              key={entry.name}
+              fill={entry.name === 'Others' ? 'var(--muted-1)' : 'var(--accent-1)'}
+              fillOpacity={entry.name === 'Others' ? 1 : Math.max(0.35, 1 - i * 0.075)}
+              stroke="var(--surface-1)"
+              strokeWidth={2}
+            />
+          ))}
+        </Pie>
+        <Tooltip
+          contentStyle={{
+            background: 'var(--surface-1)',
+            border: '1px solid var(--border-1)',
+            borderRadius: 8,
+            fontSize: 13,
+          }}
+          labelStyle={{ color: 'var(--ink-1)', fontWeight: 600 }}
+          formatter={(value) => [formatCurrencyFull(value), 'Spend']}
+        />
+      </PieChart>
+    </ResponsiveContainer>
   )
 }
 
@@ -114,12 +183,12 @@ function VendorProfile({ profile }) {
   )
 }
 
-function RankedList({ title, items, nameKey }) {
+function RankedList({ title, items, nameKey, limit = 8 }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface p-4">
       <h3 className="mb-3 text-sm font-medium text-ink">{title}</h3>
       <ul className="space-y-2 text-sm">
-        {items.slice(0, 8).map((item) => (
+        {items.slice(0, limit).map((item) => (
           <li key={item[nameKey]} className="flex items-center justify-between gap-3">
             <span className="text-ink-secondary">{item[nameKey]}</span>
             <span className="whitespace-nowrap tabular-nums text-ink">{formatCurrencyFull(item.totalAmount)}</span>

@@ -217,8 +217,8 @@ directly from it:
 - **A component function has no memory of its own between renders**,
   ordinary local variables reset every time the function runs again.
   `useState` is how a component gets memory anyway: `const [tab, setTab] =
-  useState('explorer')` in [`App.jsx`](client/src/App.jsx) stores a value
-  (`'explorer'`) that survives across renders, and calling `setTab(...)`
+  useState('dashboard')` in [`App.jsx`](client/src/App.jsx) stores a value
+  (`'dashboard'`) that survives across renders, and calling `setTab(...)`
   is what tells React "re-run this component's function, something it
   depends on changed."
 - **Fetching data isn't "rendering"**, it's a side effect: something that
@@ -239,7 +239,7 @@ directly from it:
 - **Only the parts of the JSX that are actually conditional get swapped.**
   [`App.jsx`](client/src/App.jsx) renders `<DisclaimerBanner />` and
   `<Nav />` as plain, unconditional children, then
-  `{tab === 'explorer' && <Explorer />}` (and two more lines just like it)
+  `{tab === 'dashboard' && <Dashboard />}` (and two more lines just like it)
   underneath. Clicking a nav tab only changes the `tab` value, so on the
   next render, those three conditional lines are the only ones that can
   produce something different; the banner's and nav's JSX comes out

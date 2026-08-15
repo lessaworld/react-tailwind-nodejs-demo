@@ -13,14 +13,16 @@ frontend, Recharts for the charts, and a single-container Docker build.
 
 Three views over one dataset:
 
-1. **Purchase Order Explorer**: a searchable, filterable, sortable table of
+1. **Monthly Spend Dashboard** (the default landing tab): FY2025 spend by
+   month, plus a top-10 breakdown by agency or by country, both filterable.
+2. **Purchase Order Explorer**: a searchable, filterable, sortable table of
    individual award transactions (free-text search, agency/category/country
-   filters, amount range, pagination).
-2. **Monthly Spend Dashboard**: FY2025 spend by month, plus a top-10
-   breakdown by agency or by country, both filterable.
-3. **Vendor Lookup**: pick a country, then a vendor within it, and see that
-   vendor's full FY2025 profile: total spend, distinct award count, agencies
-   sold to, top categories, and its own monthly trend.
+   filters, amount range, pagination), sorted by spend descending by
+   default so the biggest awards surface first.
+3. **Vendor Lookup**: pick a country to see a top-10-by-spend breakdown of
+   its vendors, then pick one for its full FY2025 profile: total spend,
+   distinct award count, agencies sold to, top categories, and its own
+   monthly trend.
 
 ## About the dataset
 

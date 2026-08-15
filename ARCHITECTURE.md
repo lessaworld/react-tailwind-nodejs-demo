@@ -3,7 +3,7 @@
 **Docs:** [README](README.md) | [Tech Primer](TECH_PRIMER.md) | [Tailwind](TAILWIND.md) | [React](REACT.md) | [Node.js](NODEJS.md)
 
 A quick tour of how the pieces fit together: a Node/Express API, a
-Vite/React/Tailwind frontend, and Recharts for the two charts. One Docker
+Vite/React/Tailwind frontend, and Recharts for the charts. One Docker
 image, one port, no database.
 
 ## Why one server, not two
@@ -98,12 +98,18 @@ PostCSS config needed. A small set of design tokens (`--surface`, `--ink`,
 what makes `bg-surface` or `text-ink` work as utilities while the colors
 flip automatically in dark mode.
 
-The Recharts bar charts read the same CSS variables for their fills and
+The Recharts charts read the same CSS variables for their fills and
 gridlines (`fill="var(--accent-1)"` instead of a hardcoded hex), so they
-follow dark mode too without any chart-specific theming logic. Both charts
-stick to a single hue on purpose: it's one measure (dollars) per bar, so
-color isn't carrying any identity, and the axis labels already say what
-each bar is.
+follow dark mode too without any chart-specific theming logic. The bar
+charts stick to a single hue on purpose: it's one measure (dollars) per
+bar, so color isn't carrying any identity, and the axis labels already say
+what each bar is. Vendor Lookup's country-level pie chart (top 10 vendors
+plus an "Others" slice) extends the same idea instead of switching to a
+rainbow: every slice is that one accent hue at a different opacity, darkest
+for the top vendor and fading out by rank, with "Others" broken out in a
+neutral gray since it's an aggregate, not a real vendor. The exact figures
+still live in the ranked list next to the chart, so no slice depends on
+color alone to be identified.
 
 ## Packages, the short list
 

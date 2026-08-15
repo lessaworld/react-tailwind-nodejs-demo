@@ -17,7 +17,8 @@ export default function Explorer() {
   const [filterOptions, setFilterOptions] = useState({ agencies: [], categories: [], countries: [] })
   const [filters, setFilters] = useState(emptyFilters)
   const [qInput, setQInput] = useState('')
-  const [sort, setSort] = useState('actionDate')
+  // Amount desc by default so the biggest awards surface immediately.
+  const [sort, setSort] = useState('amount')
   const [order, setOrder] = useState('desc')
   const [page, setPage] = useState(1)
   const [result, setResult] = useState({ rows: [], total: 0 })
