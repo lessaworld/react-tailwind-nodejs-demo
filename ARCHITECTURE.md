@@ -1,12 +1,6 @@
-# FY2025 Foreign Contractor Spend Explorer
-
-**[Live demo](http://spend-demo.lessaworld.online/)**
-
-A web app for exploring U.S. federal contract awards to foreign vendors in
-fiscal year 2025: who the U.S. government bought from overseas, what for,
-and how much. Node.js/Express on the backend, React (Vite) + Tailwind on the frontend, Recharts for the charts, and a single-container Docker build.
-
 # How this app is built
+
+**Docs:** [README](README.md) | [Tech Primer](TECH_PRIMER.md) | [Tailwind](TAILWIND.md) | [React](REACT.md) | [Node.js](NODEJS.md)
 
 A quick tour of how the pieces fit together: a Node/Express API, a
 Vite/React/Tailwind frontend, and Recharts for the two charts. One Docker
@@ -18,6 +12,22 @@ Express serves the JSON API under `/api/*` and, in production, the built
 React app for everything else. No separate frontend server, no nginx, no
 `docker-compose.yml`. Same origin means zero CORS configuration, anywhere,
 because the browser only ever talks to the server it was served from.
+
+```
+repo-root/
+  client/              Vite + React + Tailwind
+    src/
+      components/       Nav, StatTile, MonthlyBarChart (shared)
+      views/             Explorer, Dashboard, VendorLookup
+      lib/               api.js (fetch helpers), format.js
+  server/              Express
+    data/               fy2025-awards.json (baked into the image)
+    routes/api.js
+    data.js              loads the JSON + computes rollups at startup
+    index.js             entrypoint; serves client/dist in production
+  Dockerfile           multi-stage build
+  .dockerignore
+```
 
 ## The server: one JSON file, one module, a handful of routes
 
@@ -48,6 +58,18 @@ to sum is `federal_action_obligation`, the per-transaction delta.
 `server/routes/api.js` is a thin layer on top: one Express route per UI
 need, each pulling query params off `req.query` and handing them to a
 `data.js` function. No data manipulation happens in the routes themselves.
+
+## API
+
+| Route | Purpose |
+|---|---|
+| `GET /api/awards` | Filtered/sorted/paginated award transactions. Query: `q`, `agency`, `category`, `country`, `minAmount`, `maxAmount`, `sort` (`actionDate`\|`amount`), `order` (`asc`\|`desc`), `page`, `pageSize` |
+| `GET /api/awards/monthly` | FY2025 Oct–Sep totals. Optional `recipient`, `agency`, `country` |
+| `GET /api/awards/breakdown` | Top-N totals by `agency` or `country` (`by=`), respecting the other filter |
+| `GET /api/filters` | Distinct agencies/categories/countries, for filter dropdowns |
+| `GET /api/countries` | Countries sorted by total spend (Vendor Lookup step 1) |
+| `GET /api/countries/:country/vendors` | Vendors in a country, sorted by total spend (step 2) |
+| `GET /api/vendors/:recipient` | Full vendor profile: totals, agencies, categories, monthly trend |
 
 ## The client: Vite, React, and not much else
 

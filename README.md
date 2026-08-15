@@ -1,10 +1,14 @@
 # FY2025 Foreign Contractor Spend Explorer
 
+**Docs:** [Architecture](ARCHITECTURE.md) | [Tech Primer](TECH_PRIMER.md) | [Tailwind](TAILWIND.md) | [React](REACT.md) | [Node.js](NODEJS.md)
+
 **[Live demo](http://spend-demo.lessaworld.online/)**
 
-A web app for exploring U.S. federal contract awards to foreign vendors in
+This is a demo project built with real data, intended to explore Node.js, React, and Tailwind development, not to make any analytical claim.
+
+This project builds a web app for exploring U.S. federal contract awards to foreign vendors in
 fiscal year 2025: who the U.S. government bought from overseas, what for,
-and how much. Node.js/Express on the backend, React (Vite) + Tailwind on the
+and how much. For its implementation, the web app uses Node.js/Express on the backend, React (Vite) + Tailwind on the
 frontend, Recharts for the charts, and a single-container Docker build.
 
 Three views over one dataset:
@@ -50,33 +54,10 @@ part of this repo. Express loads that JSON once at startup and computes
 every rollup (by country, vendor, month, agency) in memory; the dataset
 is small enough that this takes well under a second, so there's no database.
 
-## Architecture
-
-**One container. Express serves both the API and the built React app**: no
-second container, no nginx, no docker-compose, no CORS configuration
-anywhere in the project, because in production it's all one origin.
-
-```
-repo-root/
-  client/              Vite + React + Tailwind
-    src/
-      components/       Nav, StatTile, MonthlyBarChart (shared)
-      views/             Explorer, Dashboard, VendorLookup
-      lib/               api.js (fetch helpers), format.js
-  server/              Express
-    data/               fy2025-awards.json (baked into the image)
-    routes/api.js
-    data.js              loads the JSON + computes rollups at startup
-    index.js             entrypoint; serves client/dist in production
-  Dockerfile           multi-stage build
-  .dockerignore
-```
-
-The multi-stage Dockerfile builds the frontend in a Node image (stage 1),
-then copies only the built `client/dist` static files into a fresh runtime
-image (stage 2) that installs just the server's production dependencies.
-Vite and the client's `node_modules` never end up in the runtime image:
-smaller image, no build tooling shipped to production.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the app is put together
+(single-container design, project structure, and the API routes) and
+[TECH_PRIMER.md](TECH_PRIMER.md) for a plain-language refresher on the
+underlying tools.
 
 ## Running in development
 
@@ -103,15 +84,4 @@ docker run -p 3000:3000 spend-explorer
 
 Open `http://localhost:3000`. One image, one port, one command: Express
 serves the API under `/api/*` and the built React app for everything else.
-
-## API
-
-| Route | Purpose |
-|---|---|
-| `GET /api/awards` | Filtered/sorted/paginated award transactions. Query: `q`, `agency`, `category`, `country`, `minAmount`, `maxAmount`, `sort` (`actionDate`\|`amount`), `order` (`asc`\|`desc`), `page`, `pageSize` |
-| `GET /api/awards/monthly` | FY2025 Oct–Sep totals. Optional `recipient`, `agency`, `country` |
-| `GET /api/awards/breakdown` | Top-N totals by `agency` or `country` (`by=`), respecting the other filter |
-| `GET /api/filters` | Distinct agencies/categories/countries, for filter dropdowns |
-| `GET /api/countries` | Countries sorted by total spend (Vendor Lookup step 1) |
-| `GET /api/countries/:country/vendors` | Vendors in a country, sorted by total spend (step 2) |
-| `GET /api/vendors/:recipient` | Full vendor profile: totals, agencies, categories, monthly trend |
+See [ARCHITECTURE.md](ARCHITECTURE.md#api) for the full route list.
