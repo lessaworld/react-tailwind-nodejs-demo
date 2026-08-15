@@ -2,9 +2,9 @@ import { useState } from 'react'
 import Nav from './components/Nav.jsx'
 import LandingModal from './components/LandingModal.jsx'
 import DisclaimerBanner from './components/DisclaimerBanner.jsx'
-import Explorer from './views/Explorer.jsx'
+import AwardExplorer from './views/AwardExplorer.jsx'
 import Dashboard from './views/Dashboard.jsx'
-import VendorLookup from './views/VendorLookup.jsx'
+import CountryExplorer from './views/CountryExplorer.jsx'
 
 export default function App() {
   // Just three fixed views, so a bit of local state stands in for a router --
@@ -18,9 +18,9 @@ export default function App() {
       <DisclaimerBanner />
       <Nav active={tab} onChange={setTab} />
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        {tab === 'explorer' && <Explorer />}
+        {tab === 'explorer' && <AwardExplorer />}
         {tab === 'dashboard' && <Dashboard />}
-        {tab === 'vendors' && <VendorLookup />}
+        {tab === 'vendors' && <CountryExplorer />}
       </main>
     </div>
   )

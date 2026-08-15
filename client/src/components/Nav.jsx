@@ -1,7 +1,7 @@
 const TABS = [
-  { id: 'explorer', label: 'Purchase Order Explorer' },
+  { id: 'explorer', label: 'Award Explorer' },
   { id: 'dashboard', label: 'Monthly Spend Dashboard' },
-  { id: 'vendors', label: 'Vendor Lookup' },
+  { id: 'vendors', label: 'Country Explorer' },
 ]
 
 export default function Nav({ active, onChange }) {

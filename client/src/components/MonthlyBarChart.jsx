@@ -2,7 +2,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { formatCurrencyCompact, formatCurrencyFull } from '../lib/format.js'
 
 // FY2025 (Oct-Sep) monthly spend, as bars. Shared by the Dashboard (overall,
-// optionally filtered by agency/country) and Vendor Lookup (one vendor).
+// optionally filtered by agency/country) and Country Explorer (one vendor).
 // `data` is the array the API already returns from getMonthlyRollup():
 // [{ monthKey, label, amount }, ...] for all 12 fiscal months, zero-filled.
 // One series -> one hue, no legend needed (the section heading names it).
