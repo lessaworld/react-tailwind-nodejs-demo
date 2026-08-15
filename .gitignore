@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+client/dist/
+
+# Raw USASpending export + one-time shaping scripts -- large, not needed at
+# runtime. Anchored to the repo root (leading slash) so this does NOT also
+# match server/data/ -- that folder holds fy2025-awards.json, the shaped copy
+# the Dockerfile actually bakes into the image, which must stay tracked.
+/data/
+
+# Logs / OS cruft
+*.log
+.DS_Store
