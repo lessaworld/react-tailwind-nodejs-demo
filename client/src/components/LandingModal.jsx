@@ -22,7 +22,9 @@ export default function LandingModal() {
         <h2 className="text-lg font-semibold text-ink">FY2025 Foreign Contractor Spend Explorer</h2>
         <p className="mt-2 text-sm text-ink-secondary">
           A demo app for exploring U.S. federal contract awards to foreign vendors in FY2025,
-          built with React, Tailwind, and Express over a single static dataset.
+          built over a single static dataset.
+
+          This is a demo project built with real data, intended to explore Node.js, React, and Tailwind development, not to make any analytical claim.
         </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           <a
